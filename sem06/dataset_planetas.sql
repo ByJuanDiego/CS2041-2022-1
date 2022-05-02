@@ -315,3 +315,118 @@ WHERE EXISTS(
     WHERE año >= 2000 AND nombre = planeta -- La subconsulta depende de la consulta exterior
 )
 ORDER BY dist DESC;
+
+/*---------------------- WHERE/NOT EXISTS ----------------------*/
+SELECT nombre, dist
+FROM Planeta
+WHERE NOT EXISTS(
+    SELECT *
+    FROM Aterrizaje
+    WHERE año >= 2000 AND nombre = planeta -- La subconsulta depende de la consulta exterior
+)
+ORDER BY dist DESC;
+
+/*---------------------- WHERE/ANY (SOME) ----------------------*/
+SELECT nombre
+FROM Planeta P1
+WHERE P1.grav > ANY (
+    SELECT P2.grav
+    FROM Planeta P2
+    WHERE P2.dist > 1.00
+) ORDER BY P1.dist DESC;
+
+/*---------------------- WHERE/ALL (SOME) ----------------------*/
+SELECT nombre
+FROM Planeta P1
+WHERE P1.grav > ALL (
+    SELECT P2.grav
+    FROM Planeta P2
+    WHERE P2.dist < 1.00
+) ORDER BY P1.dist DESC;
+
+/*------------------ Consultas Anidadas: Valor -----------------*/
+SELECT nombre
+FROM Planeta P1
+WHERE P1.grav > (
+    SELECT grav                 -- (SELECT DISTINCT grav)
+    FROM Planeta P2             -- Debe retornar un único valor
+    WHERE P2.nombre = 'Tierra'  -- (una fila y una columna)
+);
+
+/*------------------- Consultas Anidadas: Fila -----------------*/
+SELECT S1.nombre, S1.planeta
+FROM Satélite S1
+WHERE (S1.año, S1.descubridor) = (
+    SELECT (S2.año, S2.descubridor) --
+    FROM Satélite S2                -- Debe retornar un único valor
+    WHERE S2.nombre = 'Ío'          -- (una fila del mismo numero de columnas)
+);
+
+/*
+
+FUNCIONES DE AGREGACIÓN
+
+*/
+
+/*--------------------------- COUNT ----------------------------*/
+SELECT COUNT(planeta) AS conteo
+FROM Aterrizaje;
+
+/*---------------------- COUNT(DISTINCT) -----------------------*/
+SELECT COUNT(DISTINCT planeta) AS conteo
+FROM Aterrizaje;
+
+/*---------------------------- AVG -----------------------------*/
+SELECT AVG(año) -- Puede ser FLOAT o INT (depende del sistema)
+FROM Aterrizaje;
+
+/*------------------------- AVG (CAST) -------------------------*/
+SELECT AVG(CAST(año AS FLOAT))
+FROM Aterrizaje;
+
+/*-------------------------- MIN, MAX ---------------------------*/
+
+SELECT MIN(año) AS minimo, MAX(año) AS maximo
+FROM Aterrizaje;
+
+/*-------------------------- GROUP BY ---------------------------*/
+SELECT planeta, COUNT(planeta) AS conteo
+FROM Aterrizaje
+GROUP BY planeta;
+
+/*---------------------- GROUP BY (HAVING) ----------------------*/
+SELECT planeta, COUNT(planeta) AS conteo
+FROM Aterrizaje
+GROUP BY planeta
+HAVING MAX(año) < 2000;
+
+/*---------------------- GROUP BY (EVERY) ----------------------*/
+SELECT planeta, COUNT(planeta) AS conteo
+FROM Aterrizaje
+GROUP BY planeta
+HAVING EVERY(año BETWEEN 2000 AND 2005);
+
+/*----------------------- GROUP BY (ANY) -----------------------*/
+SELECT planeta, COUNT(planeta) AS conteo
+FROM Aterrizaje
+GROUP BY planeta
+HAVING BOOL_OR(año BETWEEN 2000 AND 2005);
+
+
+/*
+
+LIMITAR RESULTADOS
+
+*/
+
+/*------------------------ FETCH FIRST ----------------------*/
+SELECT *
+FROM Aterrizaje
+ORDER BY año DESC, nave
+FETCH FIRST 3 ROWS ONLY;
+
+/*-------------------------- LIMIT -------------------------*/
+SELECT *
+FROM Aterrizaje
+ORDER BY año DESC, nave
+LIMIT (3);
