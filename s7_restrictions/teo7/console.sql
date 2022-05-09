@@ -1,6 +1,8 @@
+-- Crear usuarios en una base de datos
 CREATE ROLE usr_1 LOGIN PASSWORD 'pass_1';
 CREATE ROLE usr_2 LOGIN PASSWORD 'pass_2';
 
+-- Crear un schema dentro de una base de datos
 CREATE SCHEMA SistemaSolar;
 
 -- sólo lectura
@@ -69,8 +71,10 @@ ALTER TABLE AterrizajeEEUU ALTER COLUMN despegue TYPE VARCHAR(255);
 ------------------------------ RESTRICCIONES ------------------------------
 CREATE TABLE Cuenta(
     numero    BIGINT PRIMARY KEY,
+    -- Valores que no pueden ser nulos
     rut       VARCHAR(12)      NOT NULL,
     tipo      VARCHAR(12)      NOT NULL,
+    -- Valores no nulos rellenados por defecto con 0
     saldo_clp BIGINT           NOT NULL DEFAULT 0,
     saldo_usd DOUBLE PRECISION NOT NULL DEFAULT 0
 );
@@ -89,7 +93,7 @@ CREATE TABLE Cuenta(
     tipo      VARCHAR(12)      NOT NULL,
     saldo_clp BIGINT           NOT NULL DEFAULT 0,
     saldo_usd DOUBLE PRECISION NOT NULL DEFAULT 0,
-    -- No pueden existir dos rut con el mismo numero y tipo
+    -- No pueden existir dos tuplas con mismo rut y tipo
     UNIQUE (rut, tipo)
 );
 
@@ -139,6 +143,7 @@ CREATE TABLE Cambio(
     venta VARCHAR(3),
     compra VARCHAR(3),
     monto DOUBLE PRECISION,
+    -- Declarar llaves foráneas a una tabla
     FOREIGN KEY (venta, compra) REFERENCES Divisa (d1, d2),
     -- Llaves Compuestas
     PRIMARY KEY (id, venta, compra)
@@ -163,7 +168,9 @@ CREATE DOMAIN tr_str VARCHAR(12)
 CHECK (VALUE LIKE 'TRC%');
 
 CREATE TABLE Ingreso(
-    -- ...,
+    -- ...
+    -- ...
+    -- ...
     id tr_str PRIMARY KEY
 );
 
