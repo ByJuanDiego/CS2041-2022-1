@@ -62,3 +62,21 @@ SELECT * FROM (
 WHERE A."Terminator 1" IS NULL OR A."Terminator 2" IS NULL;
 
 -- 10)
+
+SELECT T1.nombre, T1.anho, actrices, actores, CAST(actrices AS NUMERIC)/(actrices+actores) AS proporcion
+    FROM
+        (SELECT p1.nombre, anho, count(a_nombre) AS actrices FROM
+            (pelicula p1)
+                LEFT JOIN
+            (SELECT * FROM personaje p JOIN actor a ON a.nombre = p.a_nombre WHERE genero = 'F') p2
+                ON p1.nombre = p2.p_nombre
+            GROUP BY p1.nombre, anho) AS T1
+    JOIN
+        (SELECT p1.nombre, anho, count(a_nombre) AS actores FROM
+            (pelicula p1)
+                LEFT JOIN
+            (SELECT * FROM personaje p JOIN actor a ON a.nombre = p.a_nombre WHERE genero = 'M') p2
+                ON p1.nombre = p2.p_nombre
+            GROUP BY p1.nombre, anho) AS T2
+    ON T1.nombre = T2.nombre
+ORDER BY proporcion, actrices DESC, actores DESC;
