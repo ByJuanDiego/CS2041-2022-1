@@ -66,7 +66,7 @@ WHERE fuente = 'The Guardian';
 INSERT INTO EvaluacionGuardian VALUES('Believe','Justin Bieber','The Guardian',60);
 
 
-
+-- Las vistas materializadas no se actualizan directamente al insertar valores en las tablas que las generan
 CREATE MATERIALIZED VIEW AlbumEvalvm AS
 SELECT album,artista, FLOOR(AVG(eval)) AS pm, count(eval) num
 FROM Evaluacion
@@ -77,4 +77,73 @@ WHERE album ='You Want It Darker' AND artista ='Leonard Cohen';
 
 REFRESH MATERIALIZED VIEW AlbumEvalvm;
 
+-- Stores Procedure
 
+-- Es ineficiente porque actualizara toda la vista materializada
+CREATE FUNCTION updateVMPm() RETURNS TRIGGER AS $$
+BEGIN
+    REFRESH MATERIALIZED VIEW AlbumEvalvm;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+-- drop function updateVMPm;
+
+-- Es mas eficiente porque actualizara solo el album que cambio
+CREATE TABLE AlbumEval1 as
+SELECT album,artista, FLOOR(AVG(eval)) as pm, count(eval) num
+FROM Evaluacion
+GROUP BY album, artista;
+
+CREATE OR REPLACE FUNCTION updatePM() RETURNS TRIGGER AS $$
+BEGIN
+	IF EXISTS(
+			SELECT * FROM AlbumEval1 A
+				WHERE A.album = NEW.album
+					AND A.artista = NEW.artista
+				)
+	THEN
+	UPDATE AlbumEval1
+		SET pm = P.pmn , num =P.numn
+		FROM (SELECT
+			 	AVG(E.eval) AS pmn, COUNT(E.eval) AS numn
+			  FROM Evaluacion E
+			  WHERE E.album = NEW.album AND
+			  		E.artista = NEW.artista
+			  GROUP BY E.album, E.artista
+			  ) P
+		WHERE 	album = NEW.album AND
+				artista = NEW.artista;
+
+	ELSE
+		INSERT INTO AlbumEval1
+			(album, artista, pm,num)
+			SELECT E.album, E.artista,
+					AVG(E.eval) as pmn,
+					COUNT(E.eval) as numn
+			FROM Evaluacion E
+			WHERE   E.album = NEW.album AND
+			  		E.artista = NEW.artista
+			GROUP BY E.album, E.artista;
+
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Triggers
+CREATE TRIGGER ActualizarVmPM
+    AFTER INSERT OR UPDATE ON Evaluacion
+    FOR EACH ROW EXECUTE PROCEDURE updateVMPm();
+
+CREATE TRIGGER ActualizarPM
+    AFTER INSERT OR UPDATE ON Evaluacion
+    FOR EACH ROW EXECUTE PROCEDURE updatePM();
+
+INSERT INTO Evaluacion (album, artista, fuente, eval)
+VALUES ('Popular Problems','Leonard Cohen','Uncut', 4);
+INSERT INTO Evaluacion (album, artista, fuente, eval)
+VALUES ('Popular Problems','Leonard Cohen','Rolling Stone', 50);
+
+SELECT * FROM AlbumEvalvm;
+SELECT * FROM AlbumEval1;
