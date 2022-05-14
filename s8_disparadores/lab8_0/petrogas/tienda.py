@@ -51,5 +51,6 @@ def UpdateCliente():
     pass
 
 
-# InsertCliente('12','1890786500','TU TIENDA.COM','JUAN PEREZ','EN TU BARRIOh');
+InsertCliente('12', '1890786500', 'TU TIENDA.COM', 'JUAN PEREZ', 'EN TU BARRIOh');
 getClientesSimple()
+getClientesSProcedure()
