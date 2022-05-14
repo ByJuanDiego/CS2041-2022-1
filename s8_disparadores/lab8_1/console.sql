@@ -180,7 +180,78 @@ CREATE TRIGGER auditoria_venta
 AFTER INSERT OR UPDATE OR DELETE ON venta
 FOR EACH ROW EXECUTE PROCEDURE func_auditoria();
 
+CREATE TRIGGER auditoria_deposito
+AFTER INSERT OR UPDATE OR DELETE ON deposito
+FOR EACH ROW EXECUTE PROCEDURE func_auditoria();
+
 INSERT INTO venta VALUES (8,'000001', '4214154','S001','A',(SELECT now()),1,12,12);
 UPDATE venta SET cantidad = 150 WHERE nro = 11;
 
 SELECT * FROM logged_actions;
+
+CREATE FUNCTION ActualizaStock() RETURNS TRIGGER AS $$
+BEGIN
+	IF EXISTS
+		(
+			SELECT *
+			FROM
+			Surtidor S
+			INNER JOIN Deposito D ON S.depositoid = D.id
+			WHERE S.nroserie = NEW.nroserie AND S.lado = NEW.lado
+		)
+	THEN
+		UPDATE Deposito
+		SET abastecido = abastecido - NEW.cantidad
+		WHERE id = (
+			SELECT D.id
+			FROM
+			Surtidor S
+			INNER JOIN Deposito D ON S.depositoid = D.id
+			WHERE S.nroserie = NEW.nroserie AND S.lado = NEW.lado
+		);
+	END IF;
+	RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_ActualizaStock
+AFTER INSERT ON venta
+FOR EACH ROW EXECUTE PROCEDURE ActualizaStock();
+
+SELECT * FROM venta;
+SELECT * FROM deposito;
+SELECT * FROM logged_actions;
+
+INSERT INTO venta VALUES (41, '000001', '4214154', 'S001', 'A', (SELECT now()), 9, 13, 12);
+-- update deposito set abastecido = 50 where id ='1';
+
+
+
+
+-- g)
+ALTER TABLE venta ADD COLUMN igv DOUBLE PRECISION;
+UPDATE venta SET igv = (montototal * 0.18) WHERE igv IS NULL;
+
+-- h)
+CREATE OR REPLACE FUNCTION calcular_total_venta() RETURNS TRIGGER AS $$
+    BEGIN
+        NEW.montototal = NEW.cantidad * NEW.preciounitario;
+        NEW.igv = NEW.montototal * 0.18;
+        RETURN NEW;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER calcular_monto_igv
+BEFORE INSERT OR UPDATE ON venta
+FOR EACH ROW EXECUTE PROCEDURE calcular_total_venta();
+
+-- Prueba insert
+INSERT INTO venta VALUES (16, '000001', '4214154', 'S001', 'A', (SELECT now()), 10, 30);
+INSERT INTO venta VALUES (17, '000001', '4214154', 'S001', 'A', (SELECT now()), 12, 25);
+SELECT * FROM venta;
+
+-- Prueba update
+UPDATE venta SET preciounitario = 25 where nro = 17;
+SELECT * FROM venta;
+
+-- DELETE FROM venta WHERE nro = 16 OR nro = 17;
