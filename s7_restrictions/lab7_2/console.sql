@@ -370,7 +370,6 @@ INSERT INTO comida (fecha_preparacion, nombre, hora_preparacion, foto, categoria
  ('2017-4-1', 'Causa', '8:50 PM', 'causa.png', 'Entrada', 'Buenazo.', 29.99);
 
 INSERT INTO pedido (fecha_preparacion, nombre, hora_preparacion, direccion, fecha, hora, dni, cantidad) VALUES
- ('2022-05-10', 'Lomo Saltado', '01:47:06.910059', 'Ap #384-3254 Nostra, Rd.', '2023-02-12', '14:50', '6650937',2),
  ('2017-02-01','Lomo Saltado', '20:50:00', '486-5282 Erat St.', '2022-01-26', '21:43', '6650937', 5),
  ('2017-02-02','Pollo Saltado', '19:50', '703-8817 In, Rd.','2022-02-08', '20:59','6650937',3),
  ('2017-02-02','Chancho Saltado', '18:50', '5623 Dui Av.','2021-06-11','12:06','6650937',1),
