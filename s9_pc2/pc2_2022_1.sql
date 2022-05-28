@@ -60,22 +60,27 @@ EXCEPT (
 -- (c) [4 points] ¿Quien es el tercer cliente Top del ano 2021, respecto al nro de compras
 -- realizadas y montos totales? y muestre la cantidad de compras que realiz´o en cada
 -- mes.
+
+SELECT nrodocumentocli, extract(month from fecha) AS mes, count(venta.nrodocumentocli) AS compras_por_mes FROM(
 SELECT * FROM (
-    SELECT nombre, nrodocumentocli, count(nro) AS "Cantidad de Compras", sum(montototal) AS montos_totales
+    SELECT nombre, nrodocumentocli
     FROM venta JOIN cliente on venta.nrodocumentocli = cliente.nrodocumento
     WHERE extract(YEAR FROM fecha) = '2021' -- Para filtrar las compras del 2021
     GROUP BY nombre, nrodocumentocli
-    ORDER BY "Cantidad de Compras" DESC
+    ORDER BY count(nro) DESC
     LIMIT 3
     ) T1
 EXCEPT (
-    select nombre, nrodocumentocli, count(nro) AS "Cantidad de Compras", sum(montototal) AS montos_totales
+    select nombre, nrodocumentocli
     FROM venta JOIN cliente on venta.nrodocumentocli = cliente.nrodocumento
     WHERE extract(YEAR FROM fecha) = '2021' -- Para filtrar las compras del 2021
     GROUP BY nombre, nrodocumentocli
-    ORDER BY "Cantidad de Compras" DESC
+    ORDER BY count(nro) DESC
     LIMIT 2
-);
+)
+) T2 NATURAL JOIN venta WHERE extract(YEAR from  fecha) = 2021
+GROUP BY extract(month from  fecha), nrodocumentocli;
+
 
 -- (d) [4 points] Transforme la siguiente consulta SQL a Algebra Relacional
 SELECT *
