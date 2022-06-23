@@ -1,0 +1,37 @@
+· Actualizacion Repetida (conflicto WW)
+
+    Una transaccion escribe sobre los datos que otra tx
+    ya habia escrito.
+
+    T1 ==> |--------- R(x) --- W(x) ---------|
+    T2 ==> |--- R(x) --------------- W(x) ---|
+
+    { T2 sobreescribe lo que T1 ya habia escrito
+        R2: El asiento 24 esta libre? Si
+        R1: El asiento 24 esta libre? Si
+        W1: Reserve el 24
+        W2: Reserve el 24
+    } W2 sobreescribe la reserva W1
+
+· Lectura Sucia (conflicto WR)
+
+    Una tx lee lo que otra tx escribio pero no se habia
+    confirmado aun.
+
+    T1 ==> |--------- R(x) --- W(x) ---------|
+    T2 ==> |--- W(x) ----------------- A ----|
+
+    { T1 lee datos que T2 aun no confirma
+        W2: Reserva el 24
+        R1: El 24 esta libre? No
+        W1: Reserva en primera clase entonces.
+        A2: Abortar transaccion
+    } W2 no confirmo su transaccion
+
+· Lectura No Repetible (conflicto RW)
+
+    Una tx sobreescribe un dato que otra tx ya habia
+    leido antes pero no habia confirmado.
+
+    T1 ==> |--------- W(x) ---------|
+    T2 ==> |--- R(x) ------ R(x) ---|
