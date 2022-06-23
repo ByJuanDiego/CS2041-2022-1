@@ -35,3 +35,10 @@
 
     T1 ==> |--------- W(x) ---------|
     T2 ==> |--- R(x) ------ R(x) ---|
+
+    { T1 escribe un dato que T2 ya habia leido
+        R2 Cuales asientos hay?
+        W1 Reserve el 24
+        R2 Cuales asientos hay? (menos!)
+    } Los datos de los registros cambian en 2 lecturas consecutivas
+ 
