@@ -1,0 +1,68 @@
+1. Join (Sin indices) // no son indices, ni pk, nunca es buena opcion
+
+R ⋈ S
+- Para cada tupla r ∈ R
+    - Para cada tupla s ∈ S
+        - Si s y r satisfacen el join:
+            escribir {s} x {r}
+
+COSTO: |R|/B + |R|*|S|/R
+MEMORIA: 2B tuplas
+|R| < |S| (ahorrar tiempo)
+
+
+2. Join (Con indices)
+Recomendado cuando el indice esta disponible y:
+    Pocas tuplas en S satisfacen el join
+
+R ⋈ S
+- Para cada tupla r ∈ R
+    - Buscar s ∈ S en el indice tal que r y s satisfagan el join:
+        escribir {s} x {r}
+
+
+sea β(S): costo de buscar en S
+COSTO:
+    |R|/B + |R| * β(S)
+    ------------------------------+-------------------------------------------------
+    |R|/B + |R| * |S|/B           | peor caso
+    |R|/B + |R| * O(logb(|S|/B))  | mejor caso: Arbol B+ (disco)
+    |R|/B + |R| * O(1)            | mejor caso: Hash / Arbol B+ (memoria principal)
+
+Memoria: 2B tuplas
+|R| < |S| (ahorrar tiempo)
+
+
+3. Hash Join
+Recomendado cuando R cabe en memoria y:
+    Muchas tuplas en S satisfacen el join
+
+R ⋈ S
+- Guardar S en memoria principal
+- Para cada tupla r ∈ R
+    - Buscar s en memoria principal tal que r y s satisfagan el join:
+        escribir {s} x {r}
+
+COSTO: |R|/B + |S|/B
+Memoria: |S| + B tuplas
+|S| < |R| (oara ahorrar memoria)
+
+
+4. Sort Merge Join
+Recomendado cuando R y S estan ordenandos por los atributos del join y:
+    Muchas tuplas en ambos satisfacen el join
+
+R ⋈ S
+
+- Ordenar R y S por los atributos del join
+- Aplicar un merge-sort y para cada tupla r y s que satisfagan el join:
+    escribir {r} x {s}
+
+sea O el costo de ordenamiento
+COSTO: O + |R|/B + |S|/B
+Memoria: 2B tuplas (una vez ordenadas)
+No importa el orden
+
+Puede ser que las relaciones ya estén ordenadas por los atributos del
+join, en cual caso ¡es una buena opción!
+
