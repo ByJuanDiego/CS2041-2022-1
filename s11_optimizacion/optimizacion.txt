@@ -1,4 +1,4 @@
-1. Join (Sin indices) // no son indices, ni pk, nunca es buena opcion
+1. Join Nested Loop (Sin indices) // no son indices, ni pk, nunca es buena opcion
 
 R ⋈ S
 - Para cada tupla r ∈ R
@@ -6,12 +6,12 @@ R ⋈ S
         - Si s y r satisfacen el join:
             escribir {s} x {r}
 
-COSTO: |R|/B + |R|*|S|/R
+COSTO: |R|/B + |R|*|S|/B
 MEMORIA: 2B tuplas
 |R| < |S| (ahorrar tiempo)
 
 
-2. Join (Con indices)
+2. Join Nested Loop (Con indices)
 Recomendado cuando el indice esta disponible y:
     Pocas tuplas en S satisfacen el join
 
@@ -65,4 +65,3 @@ No importa el orden
 
 Puede ser que las relaciones ya estén ordenadas por los atributos del
 join, en cual caso ¡es una buena opción!
-
